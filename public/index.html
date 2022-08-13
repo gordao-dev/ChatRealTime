@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Local</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.1/socket.io.js"></script>
+    
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <form id="chat">
+        <input type="text" name="username" placeholder="Digite seu usuário.">
+        <div class="messages" ></div>
+        <input type="text" name="message" placeholder="Digite sua mensagem.">
+        <button type="submit">Enviar</button>
+    </form>
+
+    <script type="text/javascript">
+        var socket = io('http://localhost:3000');
+        // renders the name of the message author and the message.
+        function renderMessage(message) {
+            $('.messages').append('<div calass="message"><strong>'+ message.author +'</strong>: '+ message.message +' </div>')
+        }
+        // render all messages sent in the application
+        socket.on('previousMessages', function(messages) {
+            for (message of messages) {
+                renderMessage(message);
+            }
+        });
+        // render the message forwarded in the application
+        socket.on('receivedMessage', function(message) {
+            renderMessage(message);
+        });
+
+        // check when the chat is submitted.
+        $("#chat").submit(function(event) {
+            event.preventDefault();
+           //gets the values ​​typed in the user and message fields.
+            var author = $(`input[name=username]`).val();
+            var message = $(`input[name=message]`).val();
+            // check if something has been typed.
+            if (author.length && message.length) {
+                var messageObject = {
+                    author: author,
+                    message: message,
+                };
+                //Renders the object containing the author of the message and the message.
+                renderMessage(messageObject);
+                // send the object's message.
+                socket.emit('sendMessage', messageObject); 
+
+            }    
+        });    
+  </script>     
+</body>  
+</html> 
